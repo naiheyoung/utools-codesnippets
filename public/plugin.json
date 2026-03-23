@@ -1,0 +1,29 @@
+{
+  "main": "index.html",
+  "logo": "logo.png",
+  "platform": [
+    "win32"
+  ],
+  "features": [
+    {
+      "code": "list",
+      "explain": "view code snippets",
+      "cmds": [
+        "代码片段",
+        "codesnippets"
+      ]
+    },
+    {
+      "code": "create",
+      "explain": "create code snippets",
+      "cmds": [
+        "创建代码片段",
+        "codesnippets create"
+      ]
+    }
+  ],
+  "development": {
+    "main": "http://localhost:3000/"
+  },
+  "$schema": "../node_modules/utools-api-types/resource/utools.schema.json"
+}
