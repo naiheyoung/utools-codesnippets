@@ -9,7 +9,7 @@ export const useAlert = defineStore('alertInfo', () => {
       _type.value = ''
       _text.value = ''
     },
-    2700,
+    1750,
     {
       immediate: false
     }

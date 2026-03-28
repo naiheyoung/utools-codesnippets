@@ -47,7 +47,8 @@ const s = (langs: string[], code: string) => {
   const lang = langs.find(l => LANGS.includes(l))
   return highlighter.codeToHtml(code, {
     lang: lang || 'plain',
-    theme: 'vitesse-dark'
+    theme: 'vitesse-dark',
+    transformers: [codeBreakTransformer]
   })
 }
 

@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Background: typeof import('./src/components/Background.vue')['default']
+    CornerBox: typeof import('./src/components/CornerBox.vue')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
     NCascader: typeof import('naive-ui')['NCascader']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']

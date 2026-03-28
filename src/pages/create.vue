@@ -91,7 +91,9 @@
           v-text="alert.text"></div>
       </transition>
       <div class="ml-auto">
-        <span class="select-none pointer-events-none mr2">Save&nbsp;Snippet</span>
+        <span class="select-none mr2 hover:cursor-pointer" @click="save">
+          Save&nbsp;Snippet
+        </span>
         <code class="text-xs b px0.5 font-code text-white/80 rounded-sm b-white/30 mr0.5">
           {{ 'Ctrl' }}
         </code>
@@ -223,6 +225,27 @@ const tagRenderLabel = (option: SelectOption) => {
     [option.label as string]
   )
 }
+const save = async () => {
+  if (!snippetInfo.code || !snippetInfo.title || !snippetInfo.title.trim()) {
+    alert.show('e', 'Missing required fields.')
+    return
+  }
+  try {
+    snippetInfo.createdAt = dayjs().valueOf()
+    snippetInfo.updatedAt = dayjs().valueOf()
+    const key = await snippetRepo.create(toRaw(snippetInfo))
+    if (!key) return
+    alert.show('ok', 'Snippet Created!')
+    snippetInfo.id = nanoid()
+    snippetInfo.code = ''
+    snippetInfo.title = ''
+    snippetInfo.icon = defaultIcon
+    snippetInfo.keyword = null
+    snippetInfo.tags = null
+  } catch (e) {
+    alert.show('e', 'Failed to create snippet.')
+  }
+}
 
 const indent = '  '
 
@@ -241,28 +264,7 @@ useEventListener(editor, 'keydown', e => {
 useEventListener('keydown', async evt => {
   if (evt.key !== 'Enter' || !evt.ctrlKey) return
   evt.preventDefault()
-  if (!snippetInfo.code || !snippetInfo.title || !snippetInfo.title.trim()) {
-    alert.show('e', 'Missing required fields.')
-    return
-  }
-  try {
-    snippetInfo.createdAt = dayjs().valueOf()
-    snippetInfo.updatedAt = dayjs().valueOf()
-    const key = await snippetRepo.create(toRaw(snippetInfo))
-    if (key) {
-      alert.show('ok', 'Snippet Created!')
-      snippetInfo.id = nanoid()
-      snippetInfo.code = ''
-      snippetInfo.title = ''
-      snippetInfo.icon = defaultIcon
-      snippetInfo.keyword = null
-      snippetInfo.tags = null
-      return
-    }
-    throw new Error('Something went wrong...')
-  } catch (e) {
-    alert.show('e', 'Failed to create snippet.')
-  }
+  await save()
 })
 
 onMounted(async () => {

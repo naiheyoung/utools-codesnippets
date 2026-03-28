@@ -44,7 +44,24 @@ export class SnippetRepository {
 
   async delete(id: string) {
     const db = await dbPromise
-    return db.delete(STORES.SNIPPETS, id)
+    const tx = db.transaction([STORES.SNIPPETS, STORES.TAGS], 'readwrite')
+    const snippetStore = tx.objectStore(STORES.SNIPPETS)
+    const tagStore = tx.objectStore(STORES.TAGS)
+    const snippetIdx = snippetStore.index('by-tags')
+    const tagIdx = tagStore.index('by-title')
+    const snippet = await snippetStore.get(id)
+    const tags = snippet.tags ?? []
+    for (const tag of tags) {
+      const r = await snippetIdx.getAll(tag)
+      if (r.length === 1) {
+        const t = await tagIdx.get(tag)
+        await tagStore.delete(t.id)
+      }
+    }
+    await snippetStore.delete(id)
+    const total = await snippetStore.count()
+    total <= 0 && (await tagStore.clear())
+    await tx.done
   }
 
   async findByLanguage(language: string) {

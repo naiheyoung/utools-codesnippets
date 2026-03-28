@@ -14,7 +14,7 @@
         class="px2.5 py1 rounded-l-lg font-sans text-3.75 flex-1 min-w-70%"
         placeholder="Search snippets..."
         type="text"
-        v-model="inputValue" />
+        v-model.trim="inputValue" />
       <n-select
         class="mlauto w-[max(180px,15%)]"
         :options="selectOptions"
@@ -25,7 +25,7 @@
         size="small"
         v-model:show="selectActive"
         v-model:value="selectValue"
-        @update:value="filterSnippets">
+        @update:value="selectActive = true">
         <template #arrow>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -43,94 +43,75 @@
       </n-select>
     </nav>
     <div class="px3ch py1.5ch flex h73dvh gap-x-2ch">
-      <div class="lit w-1/2">
-        <div ref="listWrapper" class="h-full px2 py3 overflow-y-auto scroll-py-3">
-          <div
-            class="rounded mb-2 flex items-center gap-x-2.5 p2 hover:cursor-pointer last:mb-0 select-none"
-            :class="{ 'bg-#343434': idx === selectIdx }"
-            :key="snippet.id"
-            v-for="(snippet, idx) in snippets"
-            @abort=""
-            @click.stop.prevent="selectIdx = idx"
-            @dblclick.stop.prevent="copy">
-            <span class="bg-#484848 p1 rounded text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                v-html="snippet.icon"
-                viewBox="0 0 32 32"></svg>
-            </span>
-            <span class="font-500" v-text="snippet.title"></span>
-            <span
-              class="bg-#484848 px1.5 py2px rounded font-code text-xs text-white/70"
-              v-if="snippet.keyword?.trim()"
-              v-text="snippet.keyword"></span>
-          </div>
+      <CornerBox ref="listWrapper" inner-class="px2 py3 scroll-py-3" outer-class="w-1/2">
+        <div
+          class="rounded mb-2 flex items-center gap-x-2.5 p2 hover:cursor-pointer last:mb-0 select-none"
+          :class="{ 'bg-#343434': idx === selectIdx }"
+          :key="snippet.id"
+          v-for="(snippet, idx) in snippets"
+          @click.stop.prevent="selectIdx = idx"
+          @dblclick.stop.prevent="copy">
+          <span class="bg-#484848 p1 rounded text-white">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              v-html="snippet.icon"
+              viewBox="0 0 32 32"></svg>
+          </span>
+          <span class="font-500" v-text="snippet.title"></span>
+          <span
+            class="bg-#484848 px1.5 py2px rounded font-code text-xs text-white/70"
+            v-if="snippet.keyword?.trim()"
+            v-text="snippet.keyword"></span>
         </div>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      </CornerBox>
       <div class="w-1/2 flex flex-col gap-y-1ch">
-        <div class="lit grow-0 shrink-0 basis-63% min-h-52.5 overflow-hidden">
-          <div class="h-full p1 px3 py2 overflow-y-auto">
-            <pre v-html="selectCode" v-if="selectSnippet?.code"></pre>
-          </div>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="lit flex-1 overflow-hidden">
-          <div class="h-full p1.5ch font-500 overflow-y-auto">
-            <div class="text-13px text-[var(--colors-d)] mb1.8 select-none">Information</div>
-            <section class="flex text-sm py2 b-b gap-x-2">
-              <span class="text-[--colors-d] select-none">Name</span>
+        <CornerBox inner-class="px3 py2" outer-class="grow-0 shrink-0 basis-63% min-h-52.5">
+          <div v-html="selectCode" v-if="selectSnippet?.code"></div>
+        </CornerBox>
+        <CornerBox inner-class="font-500 p1.5ch" outer-class="flex-1">
+          <div class="text-13px text-[var(--colors-d)] mb1.8 select-none">Information</div>
+          <section class="flex text-sm py2 b-b gap-x-2">
+            <span class="text-[--colors-d] select-none">Name</span>
+            <span
+              class="mlauto truncate"
+              v-if="selectSnippet?.title"
+              v-text="selectSnippet?.title" />
+          </section>
+          <section class="flex text-sm py1.5 b-b gap-x-2">
+            <span class="text-[--colors-d] select-none">Tags</span>
+            <div
+              id="tagBox"
+              ref="tagBox"
+              class="mlauto flex gap-x-1 items-center overflow-x-auto overscroll-x-contain"
+              v-if="selectSnippet?.tags">
               <span
-                class="mlauto truncate"
-                v-if="selectSnippet?.title"
-                v-text="selectSnippet?.title" />
-            </section>
-            <section class="flex text-sm py1.5 b-b gap-x-2">
-              <span class="text-[--colors-d] select-none">Tags</span>
-              <div
-                id="tagBox"
-                ref="tagBox"
-                class="mlauto flex gap-x-1 items-center overflow-x-auto"
-                v-if="selectSnippet?.tags">
-                <span
-                  :style="{ color: getColor(tag), backgroundColor: `${getColor(tag)}33` }"
-                  class="px2 text-xs rounded-xs"
-                  v-for="tag in selectSnippet.tags"
-                  v-text="tag" />
-              </div>
-            </section>
-            <section class="flex text-sm py1.5 b-b gap-x-2">
-              <span class="text-[--colors-d] select-none">Modified</span>
-              <span class="mlauto font-mono text-xs flex items-center min-w-0">
-                <span
-                  class="truncate"
-                  v-if="selectSnippet?.createdAt"
-                  v-text="litTime(selectSnippet.createdAt)" />
-              </span>
-            </section>
-            <section class="flex text-sm py1.5 b-b gap-x-2">
-              <span class="text-[--colors-d] select-none">Created</span>
-              <span class="mlauto font-mono text-xs flex items-center min-w-0">
-                <span
-                  class="truncate"
-                  v-if="selectSnippet?.updatedAt"
-                  v-text="litTime(selectSnippet.updatedAt)" />
-              </span>
-            </section>
-          </div>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+                :style="{ color: getColor(tag), backgroundColor: `${getColor(tag)}33` }"
+                class="px2 text-xs rounded-xs select-none"
+                v-for="tag in selectSnippet.tags"
+                v-text="tag" />
+            </div>
+          </section>
+          <section class="flex text-sm py1.5 b-b gap-x-2">
+            <span class="text-[--colors-d] select-none">Modified</span>
+            <span class="mlauto font-mono text-xs flex items-center min-w-0 select-none">
+              <span
+                class="truncate"
+                v-if="selectSnippet?.createdAt"
+                v-text="litTime(selectSnippet.createdAt)" />
+            </span>
+          </section>
+          <section class="flex text-sm py1.5 b-b gap-x-2">
+            <span class="text-[--colors-d] select-none">Created</span>
+            <span class="mlauto font-mono text-xs flex items-center min-w-0 select-none">
+              <span
+                class="truncate"
+                v-if="selectSnippet?.updatedAt"
+                v-text="litTime(selectSnippet.updatedAt)" />
+            </span>
+          </section>
+        </CornerBox>
       </div>
     </div>
     <div class="bg-white/10 h-3ch rounded-sm flex pr2 leading-3ch mt4">
@@ -182,7 +163,13 @@ let tags = $ref<Tag[]>([
   }
 ])
 let snippetsSource = $ref<Snippet[]>([])
-let snippets = $ref<Snippet[]>([])
+let snippets = $computed(() => {
+  return snippetsSource.filter(s => {
+    if (selectValue && !s.tags?.includes(selectValue)) return false
+    if (searchValue.value && !s.title.includes(searchValue.value)) return false
+    return true
+  })
+})
 let selectIdx = $ref(0)
 const selectSnippet = computed(() => snippets[selectIdx])
 const selectCode = computed(() =>
@@ -245,14 +232,7 @@ const renderLabel = (option: SelectOption, selected: boolean) => {
   )
 }
 
-watch(searchValue, v => {
-  if (!v.trim() && !selectValue) {
-    snippets = snippetsSource
-    return
-  }
-  snippets = selectValue
-    ? snippetsSource.filter(s => s.tags?.includes(selectValue) && s.title.includes(v))
-    : snippetsSource.filter(s => s.title.includes(v))
+watchDebounced([() => selectValue, () => searchValue.value], () => {
   selectIdx = 0
 })
 
@@ -261,38 +241,43 @@ const litTime = (timestamp: number) => {
 }
 const prev = () => {
   selectIdx = Math.max(selectIdx - 1, 0)
-  listEl.value?.children[selectIdx].scrollIntoView({
+  listEl.value?.innerDiv?.children[selectIdx].scrollIntoView({
     behavior: 'smooth',
     block: 'end'
   })
 }
 const next = () => {
   selectIdx = Math.min(selectIdx + 1, snippets.length - 1)
-  listEl.value?.children[selectIdx].scrollIntoView({
+  listEl.value?.innerDiv?.children[selectIdx].scrollIntoView({
     behavior: 'smooth',
     block: 'nearest'
   })
 }
 const copy = async () => {
-  await _copy(snippets[selectIdx].code)
+  if (!selectSnippet.value) return
+  await _copy(selectSnippet.value.code)
   if (copied) {
     alert.show('ok', 'Copied!')
   }
 }
-const filterSnippets = (value: string) => {
-  if (!value.trim()) {
-    snippets = snippetsSource
-  } else {
-    snippets = searchValue.value
-      ? snippetsSource.filter(
-          snippet =>
-            snippet.title.includes(searchValue.value) &&
-            snippet.tags?.some(tag => tag === value)
-        )
-      : snippetsSource.filter(snippet => snippet.tags?.some(tag => tag === value))
+const removeSnippet = async () => {
+  if (!selectSnippet.value) return
+  try {
+    await snippetRepo.delete(selectSnippet.value.id)
+    const idx = snippetsSource.findIndex(s => s.id === selectSnippet.value.id)
+    snippetsSource.splice(idx, 1)
+    prev()
+    alert.show('ok', 'Snippet Removed!')
+  } catch (e) {
+    alert.show('e', 'Failed to remove snippet.')
   }
-  selectIdx = 0
-  selectActive = true
+  try {
+    const _tags = await tagRepo.list()
+    tags.length = 1
+    tags = tags.concat(_tags)
+  } catch (e) {
+    alert.show('e', 'Failed to refresh tags.')
+  }
 }
 
 useEventListener(
@@ -308,15 +293,22 @@ useEventListener(
 )
 
 useEventListener('keydown', evt => {
-  if (evt.code !== 'ArrowUp' && evt.code !== 'ArrowDown' && evt.code !== 'Enter') return
+  if (
+    evt.code !== 'ArrowUp' &&
+    evt.code !== 'ArrowDown' &&
+    evt.code !== 'Enter' &&
+    evt.code !== 'Delete'
+  )
+    return
   evt.preventDefault()
   evt.code === 'ArrowUp' && prev()
   evt.code === 'ArrowDown' && next()
   evt.code === 'Enter' && copy()
+  evt.code === 'Delete' && removeSnippet()
 })
 
 onBeforeMount(async () => {
-  snippetsSource = snippets = await snippetRepo.listLatest()
+  snippetsSource = await snippetRepo.listLatest()
   const _tags = await tagRepo.list()
   tags = tags.concat(_tags)
 })
