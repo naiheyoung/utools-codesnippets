@@ -7,31 +7,6 @@ import VueMacros from 'unplugin-vue-macros/vite'
 import { VueRouterAutoImports } from 'vue-router/unplugin'
 import VueRouter from 'vue-router/vite'
 import { defineConfig } from 'vite'
-import Markdown from 'unplugin-vue-markdown/vite'
-import { fromHighlighter } from '@shikijs/markdown-it/core'
-import { codeBreakTransformer, highlighter } from './src/composables/highlighter'
-import { alert } from '@mdit/plugin-alert'
-import { attrs } from '@mdit/plugin-attrs'
-import { imgLazyload } from '@mdit/plugin-img-lazyload'
-import { obsidianImgSize } from '@mdit/plugin-img-size'
-import { mark } from '@mdit/plugin-mark'
-import { ruby } from '@mdit/plugin-ruby'
-import { full as emoji } from 'markdown-it-emoji'
-import linkAttributes from 'markdown-it-link-attributes'
-import magicLink from 'markdown-it-magic-link'
-import anchor from 'markdown-it-anchor'
-import {
-  transformerMetaHighlight,
-  transformerMetaWordHighlight,
-  transformerNotationDiff,
-  transformerNotationFocus,
-  transformerNotationHighlight,
-  transformerNotationWordHighlight,
-  transformerRemoveNotationEscape
-} from '@shikijs/transformers'
-import { transformerColorizedBrackets } from '@shikijs/colorized-brackets'
-import beautifulLink from 'markdown-it-beautiful-link'
-import codeSnippet from 'markdown-it-code-snippet'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
@@ -41,6 +16,7 @@ export default defineConfig({
     }
   },
   build: {
+    target: 'esnext',
     rollupOptions: {
       output: {
         entryFileNames: 'js/app.js',
@@ -51,14 +27,14 @@ export default defineConfig({
   },
   plugins: [
     VueRouter({
-      extensions: ['.vue', '.md']
+      extensions: ['.vue']
     }),
     VueMacros({
       defineOptions: false,
       defineModels: false,
       plugins: {
         vue: Vue({
-          include: [/\.vue$/, /\.md$/],
+          include: [/\.vue$/],
           features: {
             propsDestructure: true
           }
@@ -71,7 +47,6 @@ export default defineConfig({
         '@vueuse/core',
         VueRouterAutoImports,
         {
-          // add any other imports you were relying on
           'vue-router/auto': ['useLink']
         }
       ],
@@ -85,74 +60,6 @@ export default defineConfig({
       dts: true,
       resolvers: [NaiveUiResolver()]
     }),
-    UnoCSS(),
-    Markdown({
-      headEnabled: true,
-      exportFrontmatter: false,
-      exposeFrontmatter: false,
-      exposeExcerpt: false,
-      wrapperDiv: false,
-      wrapperComponent: 'ProseWrapper',
-      markdownItOptions: {
-        xhtmlOut: true,
-        breaks: true,
-        linkify: true,
-        quotes: '""\'\''
-      },
-      markdownItSetup: md => {
-        md.use(
-          fromHighlighter(highlighter, {
-            themes: {
-              light: 'vitesse-light',
-              dark: 'vitesse-dark'
-            },
-            defaultColor: false,
-            transformers: [
-              codeBreakTransformer,
-              transformerNotationDiff(),
-              transformerNotationHighlight(),
-              transformerNotationWordHighlight(),
-              transformerNotationFocus(),
-              transformerMetaHighlight(),
-              transformerMetaWordHighlight(),
-              transformerRemoveNotationEscape(),
-              transformerColorizedBrackets({
-                explicitTrigger: true
-              })
-            ]
-          })
-        )
-          .use(alert)
-          .use(attrs)
-          .use(imgLazyload)
-          .use(obsidianImgSize)
-          .use(mark)
-          .use(ruby)
-          .use(emoji)
-          .use(linkAttributes, {
-            matcher: (link: string) => /^https?:\/\//.test(link),
-            attrs: {
-              target: '_blank',
-              rel: 'noopener'
-            }
-          })
-          .use(magicLink, {
-            linksMap: {}
-          })
-          .use(anchor, {
-            level: [1, 2, 3, 4],
-            slugify: (s: string) => {
-              if (/{{frontmatter\..*/.test(s)) {
-                return ''
-              }
-              return s.toLowerCase()
-            }
-          })
-          .use(beautifulLink)
-          .use(codeSnippet, {
-            resolvePath: (filePath: string) => filePath.replace('~', 'src')
-          })
-      }
-    })
+    UnoCSS()
   ]
 })

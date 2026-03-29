@@ -14,12 +14,8 @@ declare module 'vue' {
     Background: typeof import('./src/components/Background.vue')['default']
     CornerBox: typeof import('./src/components/CornerBox.vue')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
-    NCascader: typeof import('naive-ui')['NCascader']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
-    NInput: typeof import('naive-ui')['NInput']
-    NInputGroup: typeof import('naive-ui')['NInputGroup']
     NSelect: typeof import('naive-ui')['NSelect']
-    ProseWrapper: typeof import('./src/components/prose/ProseWrapper.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
