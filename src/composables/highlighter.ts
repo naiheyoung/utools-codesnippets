@@ -1,36 +1,11 @@
-import type { ShikiTransformer } from '@shikijs/core'
-import { createHighlighter } from './shiki.bundle'
-import { addClassToHast } from '@shikijs/core'
+import type { ShikiTransformer } from 'shiki/bundle-web.mjs'
+import { addClassToHast, bundledLanguages, createHighlighter } from 'shiki/bundle-web.mjs'
 
-const LANGS = [
-  'bash',
-  'sh',
-  'bat',
-  'css',
-  'diff',
-  'docker',
-  'html',
-  'http',
-  'java',
-  'js',
-  'json',
-  'lua',
-  'md',
-  'nginx',
-  'py',
-  'ps',
-  'regex',
-  'sql',
-  'ts',
-  'vim',
-  'vue',
-  'xml',
-  'yml'
-]
+const langSet = new Set(Object.keys(bundledLanguages))
 
 const highlighter = await createHighlighter({
-  langs: LANGS,
-  themes: ['vitesse-dark', 'vitesse-light']
+  langs: Object.keys(bundledLanguages),
+  themes: ['vitesse-dark']
 })
 
 const codeBreakTransformer: ShikiTransformer = {
@@ -40,16 +15,20 @@ const codeBreakTransformer: ShikiTransformer = {
   },
   pre: hast => {
     hast.properties.tabindex = '-1'
+    hast.properties.style = (hast.properties.style as string).replace(
+      /background-color:\s*#[0-9a-fA-F]{3,8};|--shiki-dark-bg:\s*#[0-9a-fA-F]{3,8};/gi,
+      ''
+    )
   }
 }
 
 const s = (langs: string[], code: string) => {
-  const lang = langs.find(l => LANGS.includes(l))
+  const lang = langs.find(l => langSet.has(l)) ?? 'plain'
   return highlighter.codeToHtml(code, {
-    lang: lang || 'plain',
+    lang,
     theme: 'vitesse-dark',
     transformers: [codeBreakTransformer]
   })
 }
 
-export { highlighter, codeBreakTransformer, s }
+export { codeBreakTransformer, s }

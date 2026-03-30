@@ -66,11 +66,13 @@
             v-text="snippet.keyword"></span>
         </div>
       </CornerBox>
-      <div class="w-1/2 flex flex-col gap-y-1ch">
-        <CornerBox inner-class="px3 py2" outer-class="grow-0 shrink-0 basis-63% min-h-52.5">
+      <div class="w-1/2 flex flex-col gap-y-1ch min-w-0">
+        <CornerBox
+          inner-class="px3 py2"
+          outer-class="w-full grow-0 shrink-0 basis-63% min-h-52.5">
           <div v-html="selectCode" v-if="selectSnippet?.code"></div>
         </CornerBox>
-        <CornerBox inner-class="font-500 p1.5ch" outer-class="flex-1">
+        <CornerBox inner-class="font-500 p1.5ch" outer-class="w-full flex-1">
           <div class="text-13px text-[var(--colors-d)] mb1.8 select-none">Information</div>
           <section class="flex text-sm py2 b-b gap-x-2">
             <span class="text-[--colors-d] select-none">Name</span>

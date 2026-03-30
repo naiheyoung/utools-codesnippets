@@ -404,7 +404,6 @@ declare module 'vue' {
     readonly getSingletonHighlighter: UnwrapRef<typeof import('./src/composables/shiki.bundle')['getSingletonHighlighter']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hash: UnwrapRef<typeof import('./src/composables/other')['hash']>
-    readonly highlighter: UnwrapRef<typeof import('./src/composables/highlighter')['highlighter']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
