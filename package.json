@@ -8,7 +8,7 @@
     "build": "vite build",
     "dev": "vite --port 3000 --open",
     "preview": "vite preview",
-    "deploy": "pnpm build && firebase deploy",
+    "deploy": "pnpm build",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/"
   },
